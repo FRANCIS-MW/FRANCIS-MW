@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template_string
+import streamlit as st
 import pandas as pd
 import joblib
 
@@ -6,32 +6,17 @@ import joblib
 model = joblib.load("model(1).pkl")
 mlb = joblib.load("mlb.pkl")
 
-app = Flask(__name__)
+# Streamlit UI
+st.title("🐄 Animal Disease Early Detection App")
+st.markdown("Provide basic animal info and symptoms for disease prediction.")
 
-html_template = """
-<!doctype html>
-<title>Animal Disease Predictor</title>
-<h2>🐄 Animal Disease Early Detection</h2>
-<form method=post>
-  Age: <input type=number name=age required><br><br>
-  Temperature: <input type=number step=0.1 name=temp required><br><br>
-  Symptoms (comma-separated): <input type=text name=symptoms required><br><br>
-  <input type=submit value=Predict>
-</form>
+age = st.number_input("Age", min_value=0.0, step=0.1)
+temp = st.number_input("Temperature (°F)", min_value=90.0, max_value=110.0, step=0.1)
+symptom_input = st.text_input("Symptoms (comma-separated)", placeholder="e.g. coughing, loss of appetite")
 
-{% if prediction %}
-  <h3>🩺 Predicted Disease: <span style="color:green">{{ prediction }}</span></h3>
-{% endif %}
-"""
-
-@app.route("/", methods=["GET", "POST"])
-def index():
-    prediction = None
-    if request.method == "POST":
-        age = float(request.form["age"])
-        temp = float(request.form["temp"])
-        symptoms = [s.strip().lower() for s in request.form["symptoms"].split(",")]
-
+if st.button("Predict"):
+    if symptom_input:
+        symptoms = [s.strip().lower() for s in symptom_input.split(",")]
         input_dict = {sym: 0 for sym in mlb.classes_}
         for s in symptoms:
             if s in input_dict:
@@ -40,7 +25,6 @@ def index():
         input_data = [age, temp] + list(input_dict.values())
         prediction = model.predict([input_data])[0]
 
-    return render_template_string(html_template, prediction=prediction)
-
-if __name__ == "__main__":
-    app.run(debug=True)
+        st.success(f"🩺 Predicted Disease: **{prediction}**")
+    else:
+        st.warning("Please enter at least one symptom.")
