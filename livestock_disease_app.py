@@ -3,57 +3,54 @@ import pandas as pd
 import numpy as np
 import joblib
 
-# Load saved model and encoder
-@st.cache_resource
-def load_model():
-    model = joblib.load('model.pkl')
-    mlb = joblib.load('model.pkl')
-    return model, mlb
+# Set app title
+st.set_page_config(page_title="Livestock Disease Predictor", layout="centered")
+st.title("🐄 Livestock Disease Prediction App")
 
-model, mlb = load_model()
+# Load model and symptom encoder
+model = joblib.load("disease_model.pkl")
+mlb = joblib.load("symptom_encoder.pkl")
 
-# Early stage symptoms list
-early_symptom_list = ['fever', 'loss of appetite', 'weakness']
+# List of symptoms based on what was used during training
+symptom_options = list(mlb.classes_)
 
-# --- Streamlit UI ---
-st.title("🐄 Livestock Disease Predictor (Using Saved Model)")
-st.markdown("Predict livestock diseases early using symptoms, temperature, and age.")
+# Sidebar input
+st.sidebar.header("📝 Input Animal Information")
 
-age = st.number_input("Enter animal's age (in years)", min_value=0.0, step=0.1, value=2.0)
-temperature = st.number_input("Enter animal's temperature (°C)", min_value=30.0, max_value=45.0, value=38.0)
-symptoms_input = st.text_input("Enter symptoms (comma-separated)", value="fever, weakness")
+age = st.sidebar.slider("Age (in years)", min_value=0, max_value=20, value=2)
+temperature = st.sidebar.slider("Temperature (°C)", min_value=35.0, max_value=42.0, step=0.1, value=38.5)
 
-if st.button("Predict Disease"):
-    symptoms = [s.strip().lower() for s in symptoms_input.split(',')]
+# Multi-select for symptoms
+symptoms = st.sidebar.multiselect("Select Symptoms", options=symptom_options)
 
-    # Early stage check
-    is_early = any(symptom in early_symptom_list for symptom in symptoms)
-    if is_early:
-        st.success("🟢 Symptoms suggest early stage of disease.")
-    else:
-        st.warning("🟡 Symptoms may be late stage or unclear.")
+# Submit button
+if st.sidebar.button("Predict Disease"):
 
-    # Encode input symptoms
+    # Encode symptoms into the same structure used in training
     symptom_vector = np.zeros(len(mlb.classes_))
-    for s in symptoms:
-        if s in mlb.classes_:
-            symptom_vector[list(mlb.classes_).index(s)] = 1
+    for symptom in symptoms:
+        if symptom in mlb.classes_:
+            index = list(mlb.classes_).index(symptom)
+            symptom_vector[index] = 1
 
-    # Prepare input
+    # Construct input DataFrame with correct column order
     input_data = pd.DataFrame([[age, temperature] + list(symptom_vector)],
                               columns=['Age', 'Temperature'] + list(mlb.classes_))
 
-    # Prediction
-    predicted_class = model.predict(input_data)[0]
-    predicted_prob = model.predict_proba(input_data)[0]
-    class_index = list(model.classes_).index(predicted_class)
-    predicted_class_prob = predicted_prob[class_index]
+    # Predict disease
+    try:
+        predicted_class = model.predict(input_data)[0]
+        predicted_probs = model.predict_proba(input_data)[0]
+        class_index = list(model.classes_).index(predicted_class)
+        predicted_confidence = predicted_probs[class_index]
 
-    # Output
-    early_threshold = 0.7
-    if predicted_class_prob > early_threshold:
-        st.success(f"✅ Early detection: **{predicted_class}** likely.\nProbability: {predicted_class_prob:.2f}")
-    else:
-        st.warning(f"⚠️ Disease **{predicted_class}** detected.\nProbability: {predicted_class_prob:.2f}")
-    
-    st.markdown("📞 Please consult a vet for treatment.")
+        # Display results
+        st.success(f"🦠 Predicted Disease: **{predicted_class}**")
+        st.info(f"Confidence: **{predicted_confidence*100:.2f}%**")
+    except Exception as e:
+        st.error(f"Prediction error: {e}")
+        st.write("Ensure input format matches training data features.")
+
+# Footer
+st.markdown("---")
+st.caption("Created with ❤️ using Streamlit")
