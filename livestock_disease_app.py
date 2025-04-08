@@ -8,8 +8,8 @@ st.set_page_config(page_title="Livestock Disease Predictor", layout="centered")
 st.title("🐄 Livestock Disease Prediction App")
 
 # Load model and symptom encoder
-model = joblib.load("disease_model.pkl")
-mlb = joblib.load("symptom_encoder.pkl")
+model = joblib.load("model.pkl")
+mlb = joblib.load("mlb.pkl")
 
 # List of symptoms based on what was used during training
 symptom_options = list(mlb.classes_)
