@@ -3,7 +3,7 @@ import pandas as pd
 import joblib
 
 # Load model and symptom encoder
-model = joblib.load("model.pkl")
+model = joblib.load("model(1).pkl")
 mlb = joblib.load("mlb.pkl")
 
 app = Flask(__name__)
