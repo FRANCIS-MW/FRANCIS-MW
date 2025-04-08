@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import joblib
 
 # Load model and symptom encoder
 model = joblib.load("model(1).pkl")
