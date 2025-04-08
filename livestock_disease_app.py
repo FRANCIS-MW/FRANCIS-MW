@@ -6,8 +6,8 @@ import joblib
 # Load saved model and encoder
 @st.cache_resource
 def load_model():
-    model = joblib.load('disease_model.pkl')
-    mlb = joblib.load('symptom_encoder.pkl')
+    model = joblib.load('model.pkl')
+    mlb = joblib.load('model.pkl')
     return model, mlb
 
 model, mlb = load_model()
