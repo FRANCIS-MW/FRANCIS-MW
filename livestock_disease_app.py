@@ -20,6 +20,15 @@ early_warning_symptoms = {
     'blackleg': ['swollen muscle', 'limping'],
 }
 
+# Recommendations per disease
+disease_recommendations = {
+    'foot and mouth': "🩺 Isolate infected animals immediately. Disinfect the area and contact a vet for antiviral treatment. Avoid movement of livestock.",
+    'anthrax': "🚨 Report immediately to veterinary authorities. Do **not open carcasses**. Quarantine area and dispose bodies safely. Vaccinate other animals urgently.",
+    'lumpy virus': "💉 Treat with anti-inflammatories and antibiotics for secondary infections. Control insect vectors. Vaccination can prevent outbreaks.",
+    'pneumonia': "🌬 Ensure animal is warm and dry. Provide antibiotics as prescribed and improve ventilation in housing.",
+    'blackleg': "💀 Blackleg can be fatal. Isolate and treat with penicillin. Vaccination is key to prevention. Burn or bury dead animals safely.",
+}
+
 # List of symptoms based on training
 symptom_options = list(mlb.classes_)
 
@@ -53,25 +62,36 @@ if st.sidebar.button("Predict Disease"):
         predicted_confidence = predicted_probs[class_index]
 
         # Show main results
-        st.success(f"🦠 Predicted Disease: **{predicted_class}**")
+        st.success(f"🦠 Predicted Disease: **{predicted_class.upper()}**")
         st.info(f"Confidence Level: **{predicted_confidence*100:.2f}%**")
 
-        # Stage-based alert
+        # Determine and display disease stage
         if predicted_confidence < 0.4:
-            st.warning("🔍 Low confidence prediction. Symptoms may suggest an early or unclear stage. Monitor the animal closely.")
+            st.warning("🔍 **Stage:** Unclear or very early stage. Continue monitoring symptoms closely.")
+            stage = "very early or unclear"
         elif 0.4 <= predicted_confidence < 0.75:
-            st.info("✅ Symptoms suggest **early stage of disease**. Consider early treatment and isolation.")
+            st.info("🟡 **Stage:** Early stage of disease. Early treatment can help recovery.")
+            stage = "early stage"
         else:
-            st.error("⚠️ High confidence — symptoms likely represent a **progressed stage** of disease. Immediate action is recommended.")
+            st.error("🔴 **Stage:** Advanced stage. Urgent veterinary attention is required.")
+            stage = "advanced"
 
         # Cross-check early symptoms
         if predicted_class in early_warning_symptoms:
             expected_symptoms = set(early_warning_symptoms[predicted_class])
             matched = expected_symptoms.intersection(set(symptoms))
             if 0 < len(matched) < len(expected_symptoms):
-                st.info(f"🧪 Early signs of **{predicted_class}** detected based on symptoms: {', '.join(matched)}")
+                st.info(f"🧪 Early signs of **{predicted_class}** detected: {', '.join(matched)}")
             elif len(matched) == len(expected_symptoms):
                 st.success(f"✅ All early indicators of **{predicted_class}** present.")
+
+        # Show recommendation
+        st.markdown("---")
+        st.subheader("📌 Recommended Action for Farmer")
+        if predicted_class in disease_recommendations:
+            st.markdown(f"{disease_recommendations[predicted_class]}")
+        else:
+            st.markdown("🚑 General advice: Monitor closely, isolate affected animals, and contact a veterinary officer for further guidance.")
 
     except Exception as e:
         st.error("❌ Prediction failed.")
@@ -79,4 +99,4 @@ if st.sidebar.button("Predict Disease"):
 
 # Footer
 st.markdown("---")
-st.caption("Created by francis ❤️ for farmers to detect livestock diseases early and take action.")
+st.caption("Created with ❤️ by Francis — empowering farmers through AI for healthier herds.")
