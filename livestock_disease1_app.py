@@ -23,10 +23,10 @@ early_warning_symptoms = {
 # Recommendations per disease
 disease_recommendations = {
     'foot and mouth': "🩺 Isolate infected animals immediately. Disinfect the area and contact a vet for antiviral treatment. Avoid movement of livestock.",
-    'anthrax': "🚨 Report immediately to veterinary authorities. Do **not open carcasses**. Quarantine area and dispose bodies safely. Vaccinate other animals urgently.",
+    'anthrax': "🚨 Report immediately to veterinary authorities. Vaccinate other animals urgently.",
     'lumpy virus': "💉 Treat with anti-inflammatories and antibiotics for secondary infections. Control insect vectors. Vaccination can prevent outbreaks.",
     'pneumonia': "🌬 Ensure animal is warm and dry. Provide antibiotics as prescribed and improve ventilation in housing.",
-    'blackleg': "💀 Blackleg can be fatal. Isolate and treat with penicillin. Vaccination is key to prevention. Burn or bury dead animals safely.",
+    'blackleg': "💀 Blackleg can be fatal. Isolate and treat with penicillin. Vaccination is key to prevention. .",
 }
 
 # List of symptoms based on training
